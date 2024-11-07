@@ -6,6 +6,8 @@ class Realstatetypecontroller extends GetxController{
 
   final Sqldb sqldb = Sqldb();
 
+  var realStateTypeList = <RealStateTypeModel>[].obs;
+
   // Observable RealStateType object to manage RealStateType data
   var currentState = RealStateTypeModel(
     id: 0,
@@ -15,6 +17,33 @@ class Realstatetypecontroller extends GetxController{
     updatedby: '',
     updatedate: '',
   ).obs;
+  
+
+    Future<void> fetchRealStateTypeList() async {
+    try {
+      // Fetch all RealStateTypeModel data
+      List<Map> response = await sqldb.selectRaw('SELECT * FROM "real_state_type"');
+
+      if (response.isNotEmpty) {
+        // Map the response to realStateTypeList
+        realStateTypeList.value = response.map((item) {
+          return RealStateTypeModel(
+            id: item['id'],
+            name: item['name'] ?? '',
+            createdby: item['created_by'] ?? '',
+            createdate: item['create_date'] ?? '',
+            updatedby: item['updated_by'] ?? '',
+            updatedate: item['update_date'] ?? '',
+          );
+        }).toList();
+      } else {
+        Get.snackbar('Info', 'No RealStateType data available');
+      }
+    } catch (e) {
+      print('Error fetching RealStateType data: $e');
+      Get.snackbar('Error', 'Could not fetch RealStateType data');
+    }
+  }
 
   // Method to create a new RealStateType
   Future<void> createNewRealStateType(String name,
@@ -38,11 +67,35 @@ class Realstatetypecontroller extends GetxController{
     }
   }
 
-  Future<void> getRealStateTypeModelData(String RealStateTypeModelname) async {
+  Future<void> getRealStateTypeModelDataa(String RealStateTypeModelname) async {
   try {
     // Fetch RealStateTypeModel data based on the RealStateTypeModelname
     List<Map> response = await sqldb.selectRaw(
         'SELECT * FROM "real_state_type" WHERE "name" = "$RealStateTypeModelname"');
+
+    if (response.isNotEmpty) {
+      // Map the response to currentRealStateTypeModel
+      currentState.value = RealStateTypeModel(
+        id: response[0]['id'],
+        name: response[0]['name'] ?? '',
+        createdby: response[0]['created_by'] ?? '',
+        createdate: response[0]['create_date'] ?? '',
+        updatedby: response[0]['updated_by'] ?? '',
+        updatedate: response[0]['update_date'] ?? '',
+      );
+    } else {
+      Get.snackbar('Error', 'No RealStateTypeModel data found');
+    }
+  } catch (e) {
+    print('Error fetching RealStateTypeModel data: $e');
+    Get.snackbar('Error', 'Could not fetch RealStateTypeModel data');
+  }
+}
+  Future<void> getRealStateTypeModelData() async {
+  try {
+    // Fetch RealStateTypeModel data based on the RealStateTypeModelname
+    List<Map> response = await sqldb.selectRaw(
+        'SELECT * FROM "real_state_type" ');
 
     if (response.isNotEmpty) {
       // Map the response to currentRealStateTypeModel

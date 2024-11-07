@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rentmaster/constans/my_colors.dart';
-import 'package:rentmaster/controller/RealStateTypeController.dart';
+import 'package:rentmaster/controller/real_state_type_controller.dart';
 import 'package:rentmaster/model/sqldb.dart';
 
 

@@ -51,16 +51,30 @@ class Sqldb {
     "update_date" DATE
      )
     ''');
-   
+    batch.execute('''
+    CREATE TABLE "real_state"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL,  
+    "type_id" INTEGER NOT NULL,  
+    "location_id" INTEGER NOT NULL AUTOINCREMENT,  
+    "is_rentable" INTEGER NOT NULL,  
+    "parent_id" INTEGER,  
+    "description" TEXT ,
+    "created_by" TEXT ,
+    "create_date" DATE,
+    "updated_by" TEXT,
+    "update_date" DATE
+     )
+    ''');
 
     await batch.commit();
     print('Database and table created again ============');
   }
 
   _onUpgrade(Database db, int oldversion, int newversion) async {
-  //   await db.execute(
-  //      // "ALTER TABLE notes ADD COLUMN color TEXT"); // to add new column to the database whit out delele the database. but to active the code change the version code
-}
+    //   await db.execute(
+    //      // "ALTER TABLE notes ADD COLUMN color TEXT"); // to add new column to the database whit out delele the database. but to active the code change the version code
+  }
 
   deleteMyDatabase() async {
     String databasePath = await getDatabasesPath();
@@ -70,16 +84,15 @@ class Sqldb {
 
   selectData(String sql, List<dynamic> args) async {
     Database? mydb = await db;
-    List<Map> response = await mydb!.rawQuery(sql, args); 
-    return response;
-}
-
-Future<List<Map<String,dynamic>>> selectRaw(String query) async {
-    Database? mydb = await db;
-    List<Map<String,dynamic>> response = await mydb!.rawQuery(query);
+    List<Map> response = await mydb!.rawQuery(sql, args);
     return response;
   }
 
+  Future<List<Map<String, dynamic>>> selectRaw(String query) async {
+    Database? mydb = await db;
+    List<Map<String, dynamic>> response = await mydb!.rawQuery(query);
+    return response;
+  }
 
   insertData(String sql) async {
     Database? mydb = await db;
