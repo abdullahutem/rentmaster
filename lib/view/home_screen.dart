@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rentmaster/constans/my_colors.dart';
 import 'package:rentmaster/controller/user_controller.dart';
+import 'package:rentmaster/view/owners_screen.dart';
 import 'package:rentmaster/view/profile_screen.dart';
 import 'package:rentmaster/view/real_state_screen.dart';
 import 'package:rentmaster/view/real_state_type_screen.dart';
-//import 'package:rentmaster/controller/userslogin.dart';
 
 class HomeScreen extends StatelessWidget {
   final String username;
@@ -64,6 +64,14 @@ class HomeScreen extends StatelessWidget {
                 Get.offAllNamed('welcomescreen');
               },
             ),
+            _buildDashboardCard(
+                icon: Icons.precision_manufacturing_rounded,
+                title: 'إدارة الملاك',
+                color: Colors.amberAccent,
+                onTap: (){
+                 Get.to(OwnersScreen());
+
+                }),
           ],
         ),
       ),

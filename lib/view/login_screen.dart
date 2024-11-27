@@ -98,6 +98,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 user.username = usernamecontroller.text;
                               }
                             });
+                             print('Updated user: ${userController.currentUser.value.username}');
+                           // userController.currentUser.value.username = usernamecontroller.text;
                             // Redirect user to home page or dashboard
                             Get.to(HomeScreen(
                               username: usernamecontroller.text,

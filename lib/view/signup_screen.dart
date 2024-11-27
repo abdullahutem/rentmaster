@@ -161,7 +161,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           // Check if username already exists
                           List<Map> existingUser = await sqldb.selectRaw(
                               'SELECT * FROM "users" WHERE user_name = "${usernamecontroller.text}"');
-
+                              
                           if (existingUser.isNotEmpty) {
                             Get.snackbar(
                               'خطأ',

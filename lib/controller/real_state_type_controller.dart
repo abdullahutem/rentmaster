@@ -2,8 +2,7 @@ import 'package:get/get.dart';
 import 'package:rentmaster/model/real_state_type_model.dart';
 import 'package:rentmaster/model/sqldb.dart';
 
-class Realstatetypecontroller extends GetxController{
-
+class Realstatetypecontroller extends GetxController {
   final Sqldb sqldb = Sqldb();
 
   var realStateTypeList = <RealStateTypeModel>[].obs;
@@ -17,12 +16,12 @@ class Realstatetypecontroller extends GetxController{
     updatedby: '',
     updatedate: '',
   ).obs;
-  
 
-    Future<void> fetchRealStateTypeList() async {
+  Future<void> fetchRealStateTypeList() async {
     try {
       // Fetch all RealStateTypeModel data
-      List<Map> response = await sqldb.selectRaw('SELECT * FROM "real_state_type"');
+      List<Map> response =
+          await sqldb.selectRaw('SELECT * FROM "real_state_type"');
 
       if (response.isNotEmpty) {
         // Map the response to realStateTypeList
@@ -46,11 +45,12 @@ class Realstatetypecontroller extends GetxController{
   }
 
   // Method to create a new RealStateType
-  Future<void> createNewRealStateType(String name,
-                             String createdby, String createdate) async {
+  Future<void> createNewRealStateType(
+      String name, String createdby, String createdate) async {
     try {
       // Prepare SQL command
-      String sql = '''INSERT INTO real_state_type (name, created_by, create_date) 
+      String sql =
+          '''INSERT INTO real_state_type (name, created_by, create_date) 
                       VALUES ("$name", "$createdby", "$createdate")''';
 
       // Execute SQL command
@@ -67,57 +67,65 @@ class Realstatetypecontroller extends GetxController{
     }
   }
 
-  Future<void> getRealStateTypeModelDataa(String RealStateTypeModelname) async {
-  try {
-    // Fetch RealStateTypeModel data based on the RealStateTypeModelname
-    List<Map> response = await sqldb.selectRaw(
-        'SELECT * FROM "real_state_type" WHERE "name" = "$RealStateTypeModelname"');
+  Future<void> getRealStateTypeDataUsingName(
+      String RealStateTypeModelname) async {
+    try {
+      // Fetch RealStateTypeModel data based on the RealStateTypeModelname
+      List<Map> response = await sqldb.selectRaw(
+          'SELECT * FROM "real_state_type" WHERE "name" = "$RealStateTypeModelname"');
 
-    if (response.isNotEmpty) {
-      // Map the response to currentRealStateTypeModel
-      currentState.value = RealStateTypeModel(
-        id: response[0]['id'],
-        name: response[0]['name'] ?? '',
-        createdby: response[0]['created_by'] ?? '',
-        createdate: response[0]['create_date'] ?? '',
-        updatedby: response[0]['updated_by'] ?? '',
-        updatedate: response[0]['update_date'] ?? '',
-      );
-    } else {
-      Get.snackbar('Error', 'No RealStateTypeModel data found');
+      if (response.isNotEmpty) {
+        // Map the response to currentRealStateTypeModel
+        currentState.value = RealStateTypeModel(
+          id: response[0]['id'],
+          name: response[0]['name'] ?? '',
+          createdby: response[0]['created_by'] ?? '',
+          createdate: response[0]['create_date'] ?? '',
+          updatedby: response[0]['updated_by'] ?? '',
+          updatedate: response[0]['update_date'] ?? '',
+        );
+      } else {
+        Get.snackbar('Error', 'No RealStateTypeModel data found');
+      }
+    } catch (e) {
+      print('Error fetching RealStateTypeModel data: $e');
+      Get.snackbar('Error', 'Could not fetch RealStateTypeModel data');
     }
-  } catch (e) {
-    print('Error fetching RealStateTypeModel data: $e');
-    Get.snackbar('Error', 'Could not fetch RealStateTypeModel data');
   }
-}
+
+  Future<int> getRealStateTypeId(String name) async {
+    List<Map> response = await sqldb
+        .selectRaw('SELECT * FROM "real_state_type" WHERE "name" = "$name"');
+    if (response.isNotEmpty) {
+      return response[0]['id'];
+    } else {
+      return 1;
+    }
+  }
+
   Future<void> getRealStateTypeModelData() async {
-  try {
-    // Fetch RealStateTypeModel data based on the RealStateTypeModelname
-    List<Map> response = await sqldb.selectRaw(
-        'SELECT * FROM "real_state_type" ');
+    try {
+      List<Map> response =
+          await sqldb.selectRaw('SELECT * FROM "real_state_type" ');
 
-    if (response.isNotEmpty) {
-      // Map the response to currentRealStateTypeModel
-      currentState.value = RealStateTypeModel(
-        id: response[0]['id'],
-        name: response[0]['name'] ?? '',
-        createdby: response[0]['created_by'] ?? '',
-        createdate: response[0]['create_date'] ?? '',
-        updatedby: response[0]['updated_by'] ?? '',
-        updatedate: response[0]['update_date'] ?? '',
-      );
-    } else {
-      Get.snackbar('Error', 'No RealStateTypeModel data found');
+      if (response.isNotEmpty) {
+        // Map the response to currentRealStateTypeModel
+        currentState.value = RealStateTypeModel(
+          id: response[0]['id'],
+          name: response[0]['name'] ?? '',
+          createdby: response[0]['created_by'] ?? '',
+          createdate: response[0]['create_date'] ?? '',
+          updatedby: response[0]['updated_by'] ?? '',
+          updatedate: response[0]['update_date'] ?? '',
+        );
+      } else {
+        Get.snackbar('Error', 'No RealStateTypeModel data found');
+      }
+    } catch (e) {
+      print('Error fetching RealStateTypeModel data: $e');
+      Get.snackbar('Error', 'Could not fetch RealStateTypeModel data');
     }
-  } catch (e) {
-    print('Error fetching RealStateTypeModel data: $e');
-    Get.snackbar('Error', 'Could not fetch RealStateTypeModel data');
   }
-}
-
-
-  
 
   // Method to update RealStateType data
   Future<void> updateRealStateType(RealStateTypeModel RealStateType) async {
@@ -166,5 +174,4 @@ class Realstatetypecontroller extends GetxController{
       Get.snackbar('Error', 'Could not delete RealStateType');
     }
   }
-
 }

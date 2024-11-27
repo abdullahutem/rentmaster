@@ -56,7 +56,7 @@ class Sqldb {
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,  
     "type_id" INTEGER NOT NULL,  
-    "location_id" INTEGER NOT NULL AUTOINCREMENT,  
+    "location_id" INTEGER,  
     "is_rentable" INTEGER NOT NULL,  
     "parent_id" INTEGER,  
     "description" TEXT ,
@@ -66,6 +66,40 @@ class Sqldb {
     "update_date" DATE
      )
     ''');
+    // Create the "currency" table
+    batch.execute('''
+    CREATE TABLE "currency"(
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT NOT NULL,  
+      "currency_code" TEXT NOT NULL,
+      "symbol" TEXT NOT NULL
+    )
+  ''');
+
+    // Insert initial values into the "currency" table
+    batch.execute('''
+    INSERT INTO "currency" ("name", "currency_code", "symbol") VALUES 
+   ('ريال يمني', 'YER', '﷼'),
+    ('ريال سعودي', 'SAR', '﷼'),
+    ('دولار أمريكي', 'USD', "\$") 
+  ''');
+
+    // Create the "currency" table
+    batch.execute('''
+    CREATE TABLE "owners"(
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT NOT NULL,  
+      "created_by" TEXT ,
+      "create_date" DATE,
+      "updated_by" TEXT,
+      "update_date" DATE
+    )
+  ''');
+
+  // Insert initial values into the "currency" table
+    batch.execute('''
+    INSERT INTO "owners" ("name", "created_by") VALUES ('defulte','defulte')
+  ''');
 
     await batch.commit();
     print('Database and table created again ============');
