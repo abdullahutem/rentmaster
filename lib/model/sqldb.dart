@@ -41,6 +41,12 @@ class Sqldb {
     "update_date" DATE
      )
     ''');
+    // Insert initial values into the "users" table
+    batch.execute('''
+    INSERT INTO "users" ("name","user_name","email","phone_number","password","created_by","create_date") VALUES 
+    ('ppp','ppp','pppp','000000000','000000','ppp','2/2/2024')
+''');
+
     batch.execute('''
     CREATE TABLE "real_state_type"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,21 +57,45 @@ class Sqldb {
     "update_date" DATE
      )
     ''');
+
+    // Insert initial values into the "real_state_type" table
+    batch.execute('''
+    INSERT INTO "real_state_type" ("name") VALUES 
+    ('عمارة'),
+    ('شقة'),
+    ('فلة'),
+    ('حوش')
+''');
+
     batch.execute('''
     CREATE TABLE "real_state"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,  
     "type_id" INTEGER NOT NULL,  
-    "location_id" INTEGER,  
     "is_rentable" INTEGER NOT NULL,  
     "parent_id" INTEGER,  
+    "price" INTEGER,  
+    "currency_id" INTEGER,  
     "description" TEXT ,
+    "location_id" INTEGER, 
     "created_by" TEXT ,
     "create_date" DATE,
     "updated_by" TEXT,
     "update_date" DATE
      )
     ''');
+
+    batch.execute('''
+CREATE TRIGGER IF NOT EXISTS set_parent_id
+AFTER INSERT ON real_state
+FOR EACH ROW
+BEGIN
+  UPDATE real_state
+  SET parent_id = NEW.id
+  WHERE NEW.is_rentable = 1 AND id = NEW.id;
+END;
+''');
+
     // Create the "currency" table
     batch.execute('''
     CREATE TABLE "currency"(
@@ -79,8 +109,8 @@ class Sqldb {
     // Insert initial values into the "currency" table
     batch.execute('''
     INSERT INTO "currency" ("name", "currency_code", "symbol") VALUES 
-   ('ريال يمني', 'YER', '﷼'),
-    ('ريال سعودي', 'SAR', '﷼'),
+   ('ريال يمني', 'YER', ' ﷼ يمني'),
+    ('ريال سعودي', 'SAR', '﷼ سعودي'),
     ('دولار أمريكي', 'USD', "\$") 
   ''');
 
@@ -96,13 +126,60 @@ class Sqldb {
     )
   ''');
 
-  // Insert initial values into the "currency" table
+    // Insert initial values into the "Owner" table
     batch.execute('''
     INSERT INTO "owners" ("name", "created_by") VALUES ('defulte','defulte')
   ''');
 
+    // Create the "services" table
+    batch.execute('''
+    CREATE TABLE "services"(
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT NOT NULL
+    )
+''');
+
+// Insert initial values into the "services" table
+    batch.execute('''
+    INSERT INTO "services" ("name") VALUES 
+    ('نظافة'),
+    ('ماء'),
+    ('كهرباء'),
+    ('صيانة')
+''');
+
+    // Create the "tenants" table
+    batch.execute('''
+    CREATE TABLE "tenants"(
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT NOT NULL,  
+      "phone_number" TEXT NOT NULL,  
+      "created_by" TEXT ,
+      "create_date" DATE,
+      "updated_by" TEXT,
+      "update_date" DATE
+    )
+  ''');
+
+    // Create the "currency" table
+    batch.execute('''
+    CREATE TABLE "rent_type"(
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "name" TEXT NOT NULL  
+    )
+  ''');
+
+    // Insert initial values into the "currency" table
+    batch.execute('''
+    INSERT INTO "rent_type" ("name") VALUES 
+   ('يومي'),
+   ('إسبوعي'),
+   ('شهري'),
+   ('سنوي')
+  ''');
+
     await batch.commit();
-    print('Database and table created again ============');
+    print('Database and table created ============');
   }
 
   _onUpgrade(Database db, int oldversion, int newversion) async {

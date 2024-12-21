@@ -6,6 +6,8 @@ import 'package:rentmaster/view/owners_screen.dart';
 import 'package:rentmaster/view/profile_screen.dart';
 import 'package:rentmaster/view/real_state_screen.dart';
 import 'package:rentmaster/view/real_state_type_screen.dart';
+import 'package:rentmaster/view/tenants_screen.dart';
+import 'package:rentmaster/view/welcome_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String username;
@@ -61,7 +63,7 @@ class HomeScreen extends StatelessWidget {
               color: Colors.red,
               onTap: () {
                 //userslogin.logout();
-                Get.offAllNamed('welcomescreen');
+                Get.offAll(WelcomeScreen());
               },
             ),
             _buildDashboardCard(
@@ -70,7 +72,13 @@ class HomeScreen extends StatelessWidget {
                 color: Colors.amberAccent,
                 onTap: (){
                  Get.to(OwnersScreen());
-
+                }),
+            _buildDashboardCard(
+                icon: Icons.manage_accounts_outlined,
+                title: 'إدارة المستاجرين',
+                color: Colors.blueAccent,
+                onTap: (){
+                 Get.to(TenantsScreen());
                 }),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rentmaster/model/owners_model.dart';
 import 'package:rentmaster/model/sqldb.dart';
@@ -16,6 +17,7 @@ class OwnersController extends GetxController {
     updatedate: '',
   ).obs;
 
+  
   Future<void> fetchOwners() async {
     try {
       List<Map> response = await sqldb.selectRaw('select * from "owners"');
@@ -133,9 +135,9 @@ class OwnersController extends GetxController {
     int result = await sqldb.updateData(sql);
 
     if (result > 0) {
-      Get.snackbar('Success', 'Owner name updated successfully');
+      Get.snackbar('تم', 'تم تعديل إسم المالك', backgroundColor: Colors.green,colorText: Colors.white,);
     } else {
-      Get.snackbar('Error', 'Failed to update Owner name');
+      Get.snackbar('خطأ', 'لم يتم تعديل إسم المالك');
     }
   }
 

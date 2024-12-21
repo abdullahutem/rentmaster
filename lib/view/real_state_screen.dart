@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rentmaster/constans/my_colors.dart';
+import 'package:rentmaster/controller/currencey_controller.dart';
+import 'package:rentmaster/controller/owners_controller.dart';
+import 'package:rentmaster/controller/real_state_controller.dart';
 import 'package:rentmaster/controller/real_state_type_controller.dart';
+import 'package:rentmaster/controller/tenants_controller.dart';
 import 'package:rentmaster/controller/user_controller.dart';
+import 'package:rentmaster/model/owners_model.dart';
+import 'package:rentmaster/model/real_state_model.dart';
 import 'package:rentmaster/model/sqldb.dart';
+import 'package:rentmaster/model/tenants_model.dart';
 
 class RealStateScreen extends StatefulWidget {
   const RealStateScreen({super.key});
@@ -15,15 +22,60 @@ class RealStateScreen extends StatefulWidget {
 class _RealStateScreenState extends State<RealStateScreen> {
   final Realstatetypecontroller realstatetypecontroller =
       Get.put(Realstatetypecontroller());
-  RxString selectedItem = "عمارة".obs;
+  final OwnersController ownersController = Get.put(OwnersController());
+  RxString selectedItem = ''.obs;
+  RxString selectedCurrencey = ''.obs;
+  RxString selectedOwner = ''.obs;
+  RxString selectedTenant = ''.obs;
+  RxString selectedRealStateParent = ''.obs;
   TextEditingController namecontroller = TextEditingController();
   TextEditingController descriptioncontroller = TextEditingController();
-  RxBool isrentable = false.obs;
+  TextEditingController pricecontroller = TextEditingController();
+  RxBool isrentable = true.obs;
   GlobalKey<FormState> formstate = GlobalKey();
   Sqldb sqldb = Sqldb();
   int is_rentable =
       1; //معنى انه العقار يما يتاجز بنفسه هناك ابناء له هذا في حالة ان القيمة تساوي واحد
   final UserController userController = Get.put(UserController());
+  final CurrenceyController currenceyController = CurrenceyController();
+  var ownersList = <OwnersModel>[].obs;
+  var tenants_List = <TenantsModel>[].obs;
+  var real_stateList = <RealStateModel>[].obs;
+  final TenantsController tenantsController = TenantsController();
+  final RealStateController realStateController = RealStateController();
+
+// Fetch owners and update the list
+  Future<void> getOwners() async {
+    await ownersController
+        .fetchOwnersBasedOnCreatedBy(userController.currentUser.value.username);
+    ownersList.assignAll(ownersController.ownersList);
+  }
+
+  Future<void> getTenants() async {
+    await tenantsController.fetchTenantsBasedOnCreatedBy(
+        userController.currentUser.value.username);
+    tenants_List.assignAll(tenantsController.tenantsList);
+  }
+
+  Future<void> getrealStateParents() async {
+    await realStateController.fetchRealStateParentsBasedOnCreatedBy(
+        userController.currentUser.value.username);
+    real_stateList.assignAll(realStateController.realStateList);
+    print(
+        '===========================RealState List Length: ${real_stateList.length}');
+    print(
+        '========================${real_stateList.map((type) => type.name).toList()}');
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    currenceyController.fetchCurrencyList();
+    getOwners();
+    getTenants();
+    getrealStateParents();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +103,7 @@ class _RealStateScreenState extends State<RealStateScreen> {
           }
           return SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
               child: Form(
                 key: formstate,
                 child: Column(
@@ -110,7 +162,9 @@ class _RealStateScreenState extends State<RealStateScreen> {
                                 fontWeight: FontWeight.w500,
                                 color: Colors.black),
                             hint: const Text('إختر نوع العقار'),
-                            value: selectedItem.value,
+                            value: selectedItem.value.isEmpty
+                                ? null
+                                : selectedItem.value,
                             items: realstatetypecontroller.realStateTypeList
                                 .map((type) {
                               return DropdownMenuItem<String>(
@@ -176,6 +230,226 @@ class _RealStateScreenState extends State<RealStateScreen> {
                       );
                     }),
                     const SizedBox(height: 20),
+                    const Text(
+                      "إختر المالك :",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Obx(() {
+                      return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border:
+                              Border.all(color: MyColors.myYellow, width: 1),
+                          color: Colors.amber[50],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            underline: const SizedBox(),
+                            iconEnabledColor: MyColors.myYellow,
+                            iconSize: 32,
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black),
+                            hint: const Text('المالك'),
+                            value: selectedOwner.value.isEmpty
+                                ? null
+                                : selectedOwner.value,
+                            items: ownersList.map((type) {
+                              return DropdownMenuItem<String>(
+                                value: type.name,
+                                child: Text(type.name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                selectedOwner.value = value;
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "إختر الأصل :",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Obx(() {
+                      return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border:
+                              Border.all(color: MyColors.myYellow, width: 1),
+                          color: Colors.amber[50],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            underline: const SizedBox(),
+                            iconEnabledColor: MyColors.myYellow,
+                            iconSize: 32,
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black),
+                            hint: const Text('الأصل'),
+                            value: selectedRealStateParent.value.isEmpty
+                                ? null
+                                : selectedRealStateParent.value,
+                            items: real_stateList.map((type) {
+                              return DropdownMenuItem<String>(
+                                value: type.name,
+                                child: Text(type.name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                selectedRealStateParent.value = value;
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "إختر المستأجر :",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Obx(() {
+                      return AbsorbPointer(
+                        absorbing: !isrentable.value,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border:
+                                Border.all(color: MyColors.myYellow, width: 1),
+                            color: Colors.amber[50],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              underline: const SizedBox(),
+                              iconEnabledColor: MyColors.myYellow,
+                              iconSize: 32,
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black),
+                              hint: const Text('المستأجر'),
+                              value: selectedTenant.value.isEmpty
+                                  ? null
+                                  : selectedTenant.value,
+                              items: tenants_List.map((type) {
+                                return DropdownMenuItem<String>(
+                                  value: type.name,
+                                  child: Text(type.name),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  selectedTenant.value = value;
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "إختر العملة :",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Obx(() {
+                      if (currenceyController.currencyList.isEmpty) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return AbsorbPointer(
+                        absorbing: !isrentable.value,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border:
+                                Border.all(color: MyColors.myYellow, width: 1),
+                            color: Colors.amber[50],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              underline: const SizedBox(),
+                              iconEnabledColor: MyColors.myYellow,
+                              iconSize: 32,
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black),
+                              hint: const Text('العملة'),
+                              value: selectedCurrencey.value.isEmpty
+                                  ? null
+                                  : selectedCurrencey.value,
+                              items:
+                                  currenceyController.currencyList.map((type) {
+                                return DropdownMenuItem<String>(
+                                  value: type.name,
+                                  child: Text(type.name),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  selectedCurrencey.value = value;
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 20),
+                    AbsorbPointer(
+                      absorbing: !isrentable.value,
+                      child: TextFormField(
+                        controller: pricecontroller,
+                        decoration: InputDecoration(
+                          labelText: 'سعر العقار',
+                          hintText: 'أكتب سعر العقار',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          prefixIcon: Icon(
+                            Icons.attach_money_outlined,
+                            color: MyColors.myYellow,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     TextFormField(
                       controller: descriptioncontroller,
                       decoration: InputDecoration(
@@ -191,53 +465,74 @@ class _RealStateScreenState extends State<RealStateScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (formstate.currentState!.validate()) {
-                          int typeid = await realstatetypecontroller
-                              .getRealStateTypeId(selectedItem.value);
-                          int response = await sqldb.insert('real_state', {
-                            'name': namecontroller.text,
-                            'type_id': typeid,
-                            'is_rentable': is_rentable,
-                            'description': descriptioncontroller.text,
-                            'created_by':
-                                userController.currentUser.value.username,
-                            'create_date': DateTime.now().toString(),
-                          });
-                          if (response > 0) {
-                            Get.snackbar(
-                              'تم',
-                              'إدراج مجموعة العقار ',
-                              backgroundColor:
-                                  const Color.fromARGB(255, 0, 156, 29),
-                              colorText: Colors.white,
-                            );
-                            namecontroller.clear();
-                          }else{
-                            Get.snackbar(
-                              'تم',
-                              'إدراج مجموعة العقار ',
-                              backgroundColor:
-                                  const Color.fromARGB(255, 255, 0, 0),
-                              colorText: Colors.white,
-                            );
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (formstate.currentState!.validate()) {
+                            int typeid = await realstatetypecontroller
+                                .getRealStateTypeId(selectedItem.value);
+                            int currency_id = await currenceyController
+                                .getCurrencyId(selectedCurrencey.value);
+                            int response = await sqldb.insert('real_state', {
+                              'name': namecontroller.text,
+                              'type_id': typeid,
+                              'is_rentable': is_rentable,
+                              'parent_id': 1,
+                              'price': pricecontroller.text,
+                              'currency_id': currency_id,
+                              'description': descriptioncontroller.text,
+                              'created_by':
+                                  userController.currentUser.value.username,
+                              'create_date': DateTime.now().toString(),
+                            });
+                            print('Inserted RealState with ID: $response');
+                            
+                            Future<void> fetchAllRealState() async {
+                              List<Map> response = await sqldb
+                                  .selectRaw('SELECT * FROM "real_state" WHERE created_by="ppp" AND is_rentable = "1"');
+                              print('==============1111111===========All RealState Data : $response');
+                            }
+                            Future<void> fetchAllRealStateA() async {
+                              List<Map> response = await sqldb
+                                  .selectRaw('SELECT * FROM "real_state" WHERE  is_rentable = 0');
+                              print('===========00000000==============All RealState Data: $response');
+                            }
+
+                            if (response > 0) {
+                              Get.snackbar(
+                                'تم',
+                                'إدراج العقار ',
+                                backgroundColor:
+                                    const Color.fromARGB(255, 0, 156, 29),
+                                colorText: Colors.white,
+                              );
+                              namecontroller.clear();
+                            } else {
+                              Get.snackbar(
+                                'فشل',
+                                'إدراج العقار ',
+                                backgroundColor:
+                                    const Color.fromARGB(255, 255, 0, 0),
+                                colorText: Colors.white,
+                              );
+                            }
                           }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: MyColors.myYellow,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: MyColors.myYellow,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 24),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 24),
-                      ),
-                      child: const Text(
-                        'حفظ',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        child: const Text(
+                          'حفظ',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
