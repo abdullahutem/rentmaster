@@ -34,8 +34,8 @@ class _RealStateScreenState extends State<RealStateScreen> {
   RxBool isrentable = true.obs;
   GlobalKey<FormState> formstate = GlobalKey();
   Sqldb sqldb = Sqldb();
-  int is_rentable =
-      1; //معنى انه العقار يما يتاجز بنفسه هناك ابناء له هذا في حالة ان القيمة تساوي واحد
+  RxInt is_rentable =
+      0.obs; //معنى انه العقار يما يتاجز بنفسه هناك ابناء له هذا في حالة ان القيمة تساوي واحد
   final UserController userController = Get.put(UserController());
   final CurrenceyController currenceyController = CurrenceyController();
   var ownersList = <OwnersModel>[].obs;
@@ -61,10 +61,6 @@ class _RealStateScreenState extends State<RealStateScreen> {
     await realStateController.fetchRealStateParentsBasedOnCreatedBy(
         userController.currentUser.value.username);
     real_stateList.assignAll(realStateController.realStateList);
-    print(
-        '===========================RealState List Length: ${real_stateList.length}');
-    print(
-        '========================${real_stateList.map((type) => type.name).toList()}');
   }
 
   @override
@@ -197,9 +193,9 @@ class _RealStateScreenState extends State<RealStateScreen> {
                             onChanged: (bool? newvalue) {
                               isrentable.value = newvalue!;
                               if (isrentable == true) {
-                                is_rentable = 0;
+                                is_rentable.value = 0;
                               } else {
-                                is_rentable = 1;
+                                is_rentable.value = 1;
                               }
                             },
                             activeColor: Colors.amberAccent,
@@ -288,39 +284,42 @@ class _RealStateScreenState extends State<RealStateScreen> {
                     ),
                     const SizedBox(height: 10),
                     Obx(() {
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border:
-                              Border.all(color: MyColors.myYellow, width: 1),
-                          color: Colors.amber[50],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            underline: const SizedBox(),
-                            iconEnabledColor: MyColors.myYellow,
-                            iconSize: 32,
-                            style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black),
-                            hint: const Text('الأصل'),
-                            value: selectedRealStateParent.value.isEmpty
-                                ? null
-                                : selectedRealStateParent.value,
-                            items: real_stateList.map((type) {
-                              return DropdownMenuItem<String>(
-                                value: type.name,
-                                child: Text(type.name),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                selectedRealStateParent.value = value;
-                              }
-                            },
+                      return AbsorbPointer(
+                        absorbing: !isrentable.value,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border:
+                                Border.all(color: MyColors.myYellow, width: 1),
+                            color: Colors.amber[50],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              underline: const SizedBox(),
+                              iconEnabledColor: MyColors.myYellow,
+                              iconSize: 32,
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black),
+                              hint: const Text('الأصل'),
+                              value: selectedRealStateParent.value.isEmpty
+                                  ? null
+                                  : selectedRealStateParent.value,
+                              items: real_stateList.map((type) {
+                                return DropdownMenuItem<String>(
+                                  value: type.name,
+                                  child: Text(type.name),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  selectedRealStateParent.value = value;
+                                }
+                              },
+                            ),
                           ),
                         ),
                       );
@@ -472,12 +471,15 @@ class _RealStateScreenState extends State<RealStateScreen> {
                           if (formstate.currentState!.validate()) {
                             int typeid = await realstatetypecontroller
                                 .getRealStateTypeId(selectedItem.value);
+                   
+                                print('=================$typeid');
                             int currency_id = await currenceyController
                                 .getCurrencyId(selectedCurrencey.value);
                             int response = await sqldb.insert('real_state', {
                               'name': namecontroller.text,
                               'type_id': typeid,
-                              'is_rentable': is_rentable,
+                              'is_rentable': is_rentable.value,
+                              //'rentStatus': 1,
                               'parent_id': 1,
                               'price': pricecontroller.text,
                               'currency_id': currency_id,
@@ -486,19 +488,6 @@ class _RealStateScreenState extends State<RealStateScreen> {
                                   userController.currentUser.value.username,
                               'create_date': DateTime.now().toString(),
                             });
-                            print('Inserted RealState with ID: $response');
-                            
-                            Future<void> fetchAllRealState() async {
-                              List<Map> response = await sqldb
-                                  .selectRaw('SELECT * FROM "real_state" WHERE created_by="ppp" AND is_rentable = "1"');
-                              print('==============1111111===========All RealState Data : $response');
-                            }
-                            Future<void> fetchAllRealStateA() async {
-                              List<Map> response = await sqldb
-                                  .selectRaw('SELECT * FROM "real_state" WHERE  is_rentable = 0');
-                              print('===========00000000==============All RealState Data: $response');
-                            }
-
                             if (response > 0) {
                               Get.snackbar(
                                 'تم',

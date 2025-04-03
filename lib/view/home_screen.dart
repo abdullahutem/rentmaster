@@ -6,6 +6,7 @@ import 'package:rentmaster/view/owners_screen.dart';
 import 'package:rentmaster/view/profile_screen.dart';
 import 'package:rentmaster/view/real_state_screen.dart';
 import 'package:rentmaster/view/real_state_type_screen.dart';
+import 'package:rentmaster/view/show_real_state_for_rent.dart';
 import 'package:rentmaster/view/tenants_screen.dart';
 import 'package:rentmaster/view/welcome_screen.dart';
 
@@ -58,15 +59,6 @@ class HomeScreen extends StatelessWidget {
                   Get.to(RealStateScreen());
                 }),
             _buildDashboardCard(
-              icon: Icons.logout,
-              title: 'تسجيل الخروج',
-              color: Colors.red,
-              onTap: () {
-                //userslogin.logout();
-                Get.offAll(WelcomeScreen());
-              },
-            ),
-            _buildDashboardCard(
                 icon: Icons.precision_manufacturing_rounded,
                 title: 'إدارة الملاك',
                 color: Colors.amberAccent,
@@ -80,6 +72,24 @@ class HomeScreen extends StatelessWidget {
                 onTap: (){
                  Get.to(TenantsScreen());
                 }),
+                _buildDashboardCard(
+              icon: Icons.logout,
+              title: 'العقارات القابلة للايجار ',
+              color: const Color.fromARGB(255, 73, 19, 207),
+              onTap: () {
+                //userslogin.logout();
+                Get.to(ShowRealStateForRent());
+              },
+            ),
+            _buildDashboardCard(
+              icon: Icons.logout,
+              title: 'تسجيل الخروج',
+              color: Colors.red,
+              onTap: () {
+                //userslogin.logout();
+                Get.offAll(WelcomeScreen());
+              },
+            ),
           ],
         ),
       ),

@@ -73,6 +73,7 @@ class Sqldb {
     "name" TEXT NOT NULL,  
     "type_id" INTEGER NOT NULL,  
     "is_rentable" INTEGER NOT NULL,  
+    "rent_status" INTEGER ,  
     "parent_id" INTEGER,  
     "price" INTEGER,  
     "currency_id" INTEGER,  

@@ -8,6 +8,7 @@ class RealStateModel {
   final int typeid;
   final int? locationId; // Nullable
   final int isRentable;
+  final int rentStatus;
   final int parent_id; // Default to 0 if invalid
   final int price; // Default to 0 if invalid
   final String description;
@@ -23,8 +24,9 @@ class RealStateModel {
     required this.typeid,
     this.locationId,
     required this.isRentable,
-    required this.parent_id, // Ensure it's an int
-    required this.price, // Ensure it's an int
+    required this.rentStatus,
+    required this.parent_id,
+    required this.price,
     required this.description,
     required this.currency_id,
   });
